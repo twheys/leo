@@ -1,9 +1,7 @@
-package com.twheys.ai;
+package com.twheys.ml;
 
-import com.twheys.ml.BackpropagationFunction;
-import com.twheys.ml.IGradientFunction;
-import com.twheys.ml.SigmoidFunction;
 import com.twheys.test.AcceptanceTest;
+import com.twheys.test.DataSet;
 import com.twheys.test.TestUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,31 +38,36 @@ public class ANNTest {
         testANN(new BackpropagationFunction(new SigmoidFunction()));
     }
 
-    private void testANN(IGradientFunction f) throws IOException {
+    private void testANN(ICostFunction f) throws IOException {
         final int labelSize = 10;
         ArtificialNeuralNetwork ann = LA4JNeuralNetwork.create(f, 400, 25, labelSize);
 
+        DataSet trainingSet = getTestSet(labelSize);
+
+        ann.train(trainingSet.getInputs(), trainingSet.getLabels(), 75);
+
+        int totalCorrect = 0;
+        for (int i = 0; i < trainingSet.size(); i++) {
+            int prediction = convertLabel(ann.predict(trainingSet.getInputs()[i]));
+            int label = convertLabel(trainingSet.getLabels()[i]);
+
+            if (prediction == label)
+                totalCorrect++;
+        }
+        final double accuracy = 100d * ((double) totalCorrect) / trainingSet.size();
+        System.out.printf("Score: %d/%d %f%%%n", totalCorrect, trainingSet.size(), accuracy);
+
+        assertTrue(85 < accuracy);
+    }
+
+    private DataSet getTestSet(int labelSize) throws IOException {
         try (final BufferedReader dataReader = Files.newBufferedReader(DATA_PATH);
              final BufferedReader labelReader = Files.newBufferedReader(LABELS_PATH)) {
-            double[][] data = streamData(dataReader).toArray(size -> new double[size][]);
+            double[][] inputs = streamData(dataReader).toArray(size -> new double[size][]);
             double[][] labels = labelReader.lines()
                     .map(val -> TestUtils.convertLabel(Integer.valueOf(val), labelSize))
                     .toArray(size -> new double[size][]);
-
-            ann.train(data, labels, 50);
-
-            int totalCorrect = 0;
-            for (int i = 0; i < data.length; i++) {
-                int prediction = convertLabel(ann.predict(data[i]));
-                int label = convertLabel(labels[i]);
-
-                if (prediction == label)
-                    totalCorrect++;
-            }
-            final double accuracy = 100d * ((double) totalCorrect) / data.length;
-            System.out.printf("Score: %d/%d %f%%%n", totalCorrect, data.length, accuracy);
-
-            assertTrue(85 < accuracy);
+            return new DataSet(inputs, labels);
         }
     }
 }

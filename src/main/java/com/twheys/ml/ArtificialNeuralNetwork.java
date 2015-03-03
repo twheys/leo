@@ -1,4 +1,4 @@
-package com.twheys.ai;
+package com.twheys.ml;
 
 /**
  * @author <a href="mailto:twheys@gmail.com">Timothy Heys</a>

@@ -13,7 +13,7 @@ import static com.twheys.MatrixUtils.*;
 /**
  * @author <a href="mailto:twheys@gmail.com">Timothy Heys</a>
  */
-public class BackpropagationFunction implements IGradientFunction {
+public class BackpropagationFunction implements ICostFunction {
     private final ITransferFunction t;
     private final VectorAccumulator sumAccumulator = Vectors.asSumAccumulator(0.0);
 

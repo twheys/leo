@@ -1,6 +1,5 @@
-package com.twheys.ai;
+package com.twheys.ml;
 
-import com.twheys.ml.IGradientFunction;
 import org.la4j.Matrix;
 
 import java.util.Random;
@@ -10,7 +9,7 @@ import java.util.Random;
  */
 public class LA4JNeuralNetwork implements ArtificialNeuralNetwork {
 
-    public static LA4JNeuralNetwork create(IGradientFunction f, double[][][] weights) {
+    public static LA4JNeuralNetwork create(ICostFunction f, double[][][] weights) {
         assert null != weights && 2 < weights.length;
 
         final Matrix[] weightMatricies = new Matrix[weights.length];
@@ -21,7 +20,7 @@ public class LA4JNeuralNetwork implements ArtificialNeuralNetwork {
         return new LA4JNeuralNetwork(weightMatricies, f);
     }
 
-    public static LA4JNeuralNetwork create(IGradientFunction f, int... layerSizes) {
+    public static LA4JNeuralNetwork create(ICostFunction f, int... layerSizes) {
         assert null != layerSizes && 2 < layerSizes.length;
         final Random random = new Random();
 
@@ -36,9 +35,9 @@ public class LA4JNeuralNetwork implements ArtificialNeuralNetwork {
     }
 
     private final Matrix[] weights;
-    private final IGradientFunction f;
+    private final ICostFunction f;
 
-    public LA4JNeuralNetwork(final Matrix[] weights, IGradientFunction f) {
+    public LA4JNeuralNetwork(final Matrix[] weights, ICostFunction f) {
         this.weights = weights;
         this.f = f;
     }
@@ -85,11 +84,11 @@ public class LA4JNeuralNetwork implements ArtificialNeuralNetwork {
     @Override
     public double[] predict(double[] inputs) {
         final Matrix h = f.feed(Matrix.from1DArray(1, inputs.length, inputs), weights);
+
         final double[] outputs = new double[h.columns()];
         for (int i = 0; i < h.columns(); i++) {
             outputs[i] = h.get(0, i);
         }
-
         return outputs;
     }
 }
